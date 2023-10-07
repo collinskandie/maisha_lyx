@@ -1,0 +1,121 @@
+<body>
+  <!-- Page Preloder -->
+  <!-- Hero Section Begin -->
+  <%- include('hero.ejs') %>
+
+  <section class="contact spad">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+          <div class="contact__widget">
+            <span class="icon_phone"></span>
+            <h4>Phone</h4>
+            <p>+254113 811925</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+          <div class="contact__widget">
+            <span class="icon_pin_alt"></span>
+            <h4>Address</h4>
+            <p>405 Ngong Road, Nairobi, Kenya</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+          <div class="contact__widget">
+            <span class="icon_clock_alt"></span>
+            <h4>Open time</h4>
+            <p>9:00 am to 8:00 pm</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+          <div class="contact__widget">
+            <span class="icon_mail_alt"></span>
+            <h4>Email</h4>
+            <p>info@maishalyx.co.ke</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Contact Section End -->
+
+  <!-- Map Begin -->
+  <div class="map">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d16180.365394092149!2d36.69244497011821!3d-1.3125977041202883!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1b6436da54f1%3A0x7ca03a9118f8d82d!2s405%20Ngong%20Rd%2C%20Nairobi!5e0!3m2!1sen!2ske!4v1694332856076!5m2!1sen!2ske"
+      width="600"
+      height="450"
+      style="border: 0"
+      allowfullscreen=""
+      aria-hidden="false"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+    ></iframe>
+    <div class="map-inside">
+      <i class="icon_pin"></i>
+      <div class="inside-widget">
+        <h4>Nairobi</h4>
+        <ul>
+          <li>Phone: +254113 811925</li>
+          <li>Add: 405 Ngong Road, Nairobi, Kenya</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Map End -->
+
+  <!-- Contact Form Begin -->
+  <div class="contact-form spad">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="contact__form__title">
+            <h2>Leave Message</h2>
+          </div>
+        </div>
+      </div>
+      <form id="contactForm">
+        <div class="row">
+          <div class="col-lg-6 col-md-6">
+            <input type="text" placeholder="Your name" name="name" />
+          </div>
+          <div class="col-lg-6 col-md-6">
+            <input type="text" placeholder="Your Email" name="email" />
+          </div>
+          <div class="col-lg-12 text-center">
+            <textarea placeholder="Your message" name="message"></textarea>
+            <button type="button" onclick="submitForm()" class="site-btn">
+              SEND MESSAGE
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    function submitForm() {
+      const form = document.getElementById("contactForm");
+      const formData = new FormData(form);
+
+      fetch("/contact", { 
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json()) // Assuming the server returns JSON
+        .then((data) => {
+          if (data.success) {
+            // Server response indicates success
+            alert(data.sucsess); // Display a success message
+            form.reset(); // Clear the form
+          } else {
+            // Server response indicates an error
+            alert(data.sucsess); // Display an error message
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          alert("An error occurred while submitting the form.", error);
+        });
+    }
+  </script>
+</body>

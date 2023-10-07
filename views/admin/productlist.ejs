@@ -1,0 +1,734 @@
+<div
+  class="page-wrapper"
+  id="main-wrapper"
+  data-layout="vertical"
+  data-navbarbg="skin6"
+  data-sidebartype="full"
+  data-sidebar-position="fixed"
+  data-header-position="fixed"
+>
+  <%- include('sidenav.ejs') %>
+
+  <div class="body-wrapper">
+    <!--  Header Start -->
+    <header class="app-header"><%- include('nav.ejs') %></header>
+    <!--  Header End -->
+    <div class="container-fluid">
+      <button class="btn btn-primary" onclick="openNewProductModal()">
+        Add Product
+      </button>
+
+      <br />
+      <br />
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Image</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Assembly cost</th>
+            <th scope="col">Selling Price</th>
+            <th scope="col">Category</th>
+            <th scope="col">Available Quantity</th>
+            <th scope="col">Updated by</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% productlist.forEach(Product => { %>
+          <tr>
+            <th scope="row"><%= Product.productid %></th>
+            <td>
+              <img
+                src="/img/uploads/<%= Array.isArray(Product.imagesurl) ? Product.imagesurl[0] : Product.imagesurl %>"
+                alt="<%= Product.name %>"
+                width="50"
+                height="50"
+              />
+            </td>
+
+            <td><%= Product.name %></td>
+            <td><%= Product.description %></td>
+            <td><%= Product.cost %></td>
+            <td><%= Product.price %></td>
+            <td><%= Product.category %></td>
+            <td><%= Product.quantity %></td>
+            <td><%= Product.updatedby %></td>
+            <td>
+              <button
+                class="btn btn-primary"
+                onclick="openModal(
+                  '<%= Product.productid %>', 
+                  '<%= Product.name %>',
+                  '<%= Product.description %>',
+                  '<%= Product.cost %>',
+                  '<%= Product.price %>',
+                  '<%= Product.category %>',
+                  '<%= Product.quantity %>',
+                  '<%= Product.subCategory %>',
+                  '<%= Product.weight %>',
+                  '<%= Product.color %>',
+                  '<%= Product.size %>',
+                  '<%= Product.type %>',
+                  '<%= Product.availability %>')"
+              >
+                Edit
+              </button>
+
+              <br />
+              <br />
+              <button
+                class="btn btn-danger"
+                onclick="deleteProduct('<%= Product.productid %>')"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <%- include('footer.ejs') %>
+    </div>
+  </div>
+</div>
+<!-- modal-title -->
+<!-- Edit Product modal -->
+<div class="modal" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Product</h5>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="container">
+        <form id="editForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label" for="editName">Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="nameHelp"
+              id="prodId"
+              name="prodId"
+              hidden
+            />
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="nameHelp"
+              id="editName"
+              name="editName"
+            />
+            <div id="nameHelp" class="form-text">New Product name</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editDescription">Description</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="descHelp"
+              id="editDescription"
+              name="editDescription"
+            />
+            <div id="descHelp" class="form-text">Product Description</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Upload New Picture:</label>
+            <input
+              type="file"
+              class="form-control"
+              id="editImage"
+              name="editImage"
+              accept="image/*"
+              multiple
+            />
+            <div id="imageHelp" class="form-text">
+              New Product image: Upload one or more product images (hold
+              Ctrl/Cmd to select multiple).
+            </div>
+          </div>
+          <!-- Add the missing fields below -->
+          <div class="mb-3">
+            <label class="form-label" for="editCost">Cost:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="editCost"
+              name="editCost"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editPrice">Price:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="editPrice"
+              name="editPrice"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editCategory">Category:</label>
+            <select class="form-select" id="editCategory" name="editCategory">
+              <% categories.forEach(category => { %>
+              <option value="<%= category.id %>"><%= category.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editSubCategory">Subcategory:</label>
+            <select
+              class="form-select"
+              id="editSubCategory"
+              name="editSubCategory"
+            >
+              <% subcategories.forEach(subcategory => { %>
+              <option value="<%= subcategory.id %>">
+                <%= subcategory.name %>
+              </option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editQuantity">Quantity:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="editQuantity"
+              name="editQuantity"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editSize">Size:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editSize"
+              name="editSize"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editWeight">Weight:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="editWeight"
+              name="editWeight"
+              step="0.01"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editColor">Color:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editColor"
+              name="editColor"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editAvailability"
+              >Availability:</label
+            >
+            <select
+              class="form-select"
+              id="editAvailability"
+              name="editAvailability"
+            >
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newType">Product Type:</label>
+            <select class="form-select" id="editType" name="editType">
+              <option>Select product Type</option>
+              <option value="Goods">Goods</option>
+              <option value="Services">Services</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="saveProduct()"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Product modal -->
+<div class="modal" id="newProductModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Product</h5>
+        <span class="close" onclick="closeNewProductModal()">&times;</span>
+      </div>
+      <div class="container">
+        <form id="newProductForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label" for="newName">Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="newNameHelp"
+              id="newName"
+              name="newName"
+            />
+            <div id="newNameHelp" class="form-text">Product name</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newDescription">Description:</label>
+            <textarea
+              class="form-control"
+              id="newDescription"
+              name="newDescription"
+              rows="4"
+            ></textarea>
+            <div id="newDescHelp" class="form-text">Product Description</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Upload Images:</label>
+            <input
+              type="file"
+              class="form-control"
+              id="newImages"
+              name="images[]"
+              accept="image/*"
+              multiple
+            />
+            <div id="newImageHelp" class="form-text">
+              Upload one or more product images (hold Ctrl/Cmd to select
+              multiple).
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newCost">Cost:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="newCost"
+              name="newCost"
+              step="0.01"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newPrice">Price:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="newPrice"
+              name="newPrice"
+              step="0.01"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newQuantity">Quantity:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="newQuantity"
+              name="newQuantity"
+              multiple
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newSize">Size:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="newSize"
+              name="newSize"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newWeight">Weight:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="newWeight"
+              name="newWeight"
+              step="0.01"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newColor">Color:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="newColor"
+              name="newColor"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newAvailability"
+              >Availability:</label
+            >
+            <select
+              class="form-select"
+              id="newAvailability"
+              name="newAvailability"
+            >
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newType">Product Type:</label>
+            <select class="form-select" id="newType" name="newType">
+              <option>Select product Type</option>
+              <option value="Goods">Goods</option>
+              <option value="Services">Services</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newCategory">Category:</label>
+            <select class="form-select" id="newCategory" name="newCategory">
+              <% categories.forEach(category => { %>
+              <option value="<%= category.id %>"><%= category.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newSubCategory">Subcategory:</label>
+            <select
+              class="form-select"
+              id="newSubCategory"
+              name="newSubCategory"
+            >
+              <% subcategories.forEach(subcategory => { %>
+              <option value="<%= subcategory.id %>">
+                <%= subcategory.name %>
+              </option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="addNewProduct()"
+            >
+              Add Product
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function deleteProduct(ProductId) {
+    fetch(`/api/deleteProduct/${ProductId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        if (data.message) {
+          alert(data.message);
+          const row = document.querySelector(
+            `tr[data-Product-id="${ProductId}"]`
+          );
+          if (row) {
+            row.remove();
+          }
+          // Reload the page to update the table
+          window.location.reload();
+        } else {
+          // Handle error case
+          console.error("Product deletion failed");
+          alert("Product deletion failed"); // Display an error message
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while deleting the Product");
+      });
+  }
+
+  // Function to open the modal for editing
+  function openModal(
+    ProductId,
+    ProductName,
+    ProductDescription,
+    cost,
+    price,
+    category,
+    quantity,
+    subCategory,
+    weight,
+    color,
+    size,
+    type,
+    availability
+  ) {
+    const editNameInput = document.getElementById("editName");
+    const editDescription = document.getElementById("editDescription");
+    const prodId = document.getElementById("prodId");
+    const prodCost = document.getElementById("editCost");
+    const prodPrice = document.getElementById("editPrice");
+    const editCategory = document.getElementById("editCategory");
+    const editQuantity = document.getElementById("editQuantity");
+    const editSize = document.getElementById("editSize");
+    const editWeight = document.getElementById("editWeight");
+    const editColor = document.getElementById("editColor");
+    const editAvailability = document.getElementById("editAvailability");
+    const editImage = document.getElementById("editImage");
+    const editType = document.getElementById("editType");
+    // Populate the input fields with the current Product data
+    editNameInput.value = ProductName;
+    editDescription.value = ProductDescription;
+    prodId.value = ProductId;
+    prodCost.value = cost;
+    prodPrice.value = price;
+    editCategory.value = category;
+    editQuantity.value = quantity;
+    editWeight.value = weight;
+    editSize.value = size;
+    editColor.value = color;
+    editAvailability.value = availability;
+    editType.value = type;
+
+    // Show the modal
+    const modal = document.getElementById("editModal");
+    modal.style.display = "block";
+  }
+
+  // Function to close the modal
+  function closeModal() {
+    const modal = document.getElementById("editModal");
+    modal.style.display = "none";
+  }
+
+  // Function to save the edited Product
+  function saveProduct() {
+    const editNameInput = document.getElementById("editName");
+    const editDescription = document.getElementById("editDescription");
+    const prodId = document.getElementById("prodId");
+    const prodCost = document.getElementById("editCost");
+    const prodPrice = document.getElementById("editPrice");
+    const editCategory = document.getElementById("editCategory");
+    const editQuantity = document.getElementById("editQuantity");
+    const editSize = document.getElementById("editSize");
+    const editWeight = document.getElementById("editWeight");
+    const editColor = document.getElementById("editColor");
+    const editAvailability = document.getElementById("editAvailability");
+    const editImage = document.getElementById("editImage");
+    const editSubCategory = document.getElementById("editSubCategory");
+
+    const editedName = editNameInput.value;
+    const editedDescription = editDescription.value;
+    const ProductId = prodId.value;
+    const editedCost = prodCost.value;
+    const editedPrice = prodPrice.value;
+    const editedCategory = editCategory.value;
+    const editedQuantity = editQuantity.value;
+    const editedWeight = editWeight.value;
+    const editedSize = editSize.value;
+    const editedColor = editColor.value;
+    const editedAvailabilty = editAvailability.value;
+    const editedSubca = editSubCategory.value;
+
+    // Create a FormData object to handle file uploads
+    const formData = {
+      ProductId: ProductId,
+      name: editedName,
+      description: editedDescription,
+      cost: editedCost,
+      price: editedPrice,
+      quantity: editedQuantity,
+      size: editedSize,
+      weight: editedWeight,
+      color: editedColor,
+      availability: editedAvailabilty,
+      category: editedCategory,
+      subcategory: editedSubca,
+    };
+    // Add the selected image file to the FormData
+    const imageFiles = editImage.files;
+
+    if (imageFiles.length > 0) {
+      const imagePromises = [];
+      for (const imageFile of imageFiles) {
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        const imagePromise = new Promise((resolve, reject) => {
+          reader.onloadend = () => {
+            resolve(reader.result);
+          };
+          reader.onerror = (error) => {
+            reject(error);
+          };
+        });
+        imagePromises.push(imagePromise);
+      }
+
+      Promise.all(imagePromises)
+        .then((imageResults) => {
+          formData.images = imageResults;
+          // Now, you can send the newProductData as JSON
+          postEditData(formData);
+        })
+        .catch((error) => {
+          console.error("Error reading image files:", error);
+          alert("An error occurred while reading image files");
+        });
+    }
+    postEditData(formData);
+  }
+  function postEditData(requestData) {
+    console.log("Post data called");
+    const apiUrl = "/api/updateProduct";
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Specify that you're sending JSON data
+      },
+      body: JSON.stringify(requestData), // Convert the requestData object to JSON
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Product updated successfully, you can update the UI as needed
+          closeModal();
+          alert("Product updated successfully");
+          window.location.reload();
+        } else {
+          // Handle error case
+          console.error("Product update failed");
+          alert("Product update failed"); // Display an error message
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while updating the Product");
+      });
+  }
+  // Function to open the "New Product" modal
+  function openNewProductModal() {
+    const modal = document.getElementById("newProductModal");
+    modal.style.display = "block";
+  }
+
+  // Function to close the "New Product" modal
+  function closeNewProductModal() {
+    const modal = document.getElementById("newProductModal");
+    modal.style.display = "none";
+  }
+
+  // Function to add a new Product
+  function addNewProduct() {
+    const newNameInput = document.getElementById("newName");
+    const newDescriptionInput = document.getElementById("newDescription");
+    const newImageInput = document.getElementById("newImages");
+    const newCostInput = document.getElementById("newCost");
+    const newPriceInput = document.getElementById("newPrice");
+    const newQuantityInput = document.getElementById("newQuantity");
+    const newSizeInput = document.getElementById("newSize");
+    const newWeightInput = document.getElementById("newWeight");
+    const newColorInput = document.getElementById("newColor");
+    const newAvailabilityInput = document.getElementById("newAvailability");
+    const newCategoryInput = document.getElementById("newCategory");
+    const newSubCategoryInput = document.getElementById("newSubCategory");
+    const newType = document.getElementById("newType");
+
+    const newName = newNameInput.value;
+    const newDescription = newDescriptionInput.value;
+    const newCost = parseFloat(newCostInput.value);
+    const newPrice = parseFloat(newPriceInput.value);
+    const newQuantity = parseInt(newQuantityInput.value);
+    const newSize = newSizeInput.value;
+    const newWeight = parseFloat(newWeightInput.value);
+    const newColor = newColorInput.value;
+    const newAvailability = newAvailabilityInput.value;
+    const newCategory = newCategoryInput.value;
+    const newSubCategory = newSubCategoryInput.value;
+    const prodType = newType.value;
+
+    // Create an object with the new Product data
+    const newProductData = {
+      name: newName,
+      description: newDescription,
+      cost: newCost,
+      price: newPrice,
+      quantity: newQuantity,
+      size: newSize,
+      weight: newWeight,
+      color: newColor,
+      type: prodType,
+      availability: newAvailability,
+      category: newCategory,
+      subcategory: newSubCategory,
+    };
+
+    // Add the selected image files if available
+    const imageFiles = newImageInput.files;
+    if (imageFiles.length > 0) {
+      const imagePromises = [];
+      for (const imageFile of imageFiles) {
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        const imagePromise = new Promise((resolve, reject) => {
+          reader.onloadend = () => {
+            resolve(reader.result);
+          };
+          reader.onerror = (error) => {
+            reject(error);
+          };
+        });
+        imagePromises.push(imagePromise);
+      }
+
+      Promise.all(imagePromises)
+        .then((imageResults) => {
+          newProductData.images = imageResults;
+          // Now, you can send the newProductData as JSON
+          sendNewProductData(newProductData);
+        })
+        .catch((error) => {
+          console.error("Error reading image files:", error);
+          alert("An error occurred while reading image files");
+        });
+    } else {
+      // If no image was selected, send the data without the image
+      sendNewProductData(newProductData);
+    }
+  }
+
+  function sendNewProductData(newProductData) {
+    const apiUrl = "/api/addproduct"; // Replace with the actual API endpoint for adding categories
+
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Specify that you're sending JSON data
+      },
+      body: JSON.stringify(newProductData), // Convert the object to JSON
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Product added successfully, you can update the UI as needed
+          closeNewProductModal();
+          alert("Product addition Successfully");
+          window.location.reload();
+        } else {
+          // Handle error case
+          console.error("Product addition failed");
+          alert("Product addition failed"); // Display an error message
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while adding the Product");
+      });
+  }
+</script>

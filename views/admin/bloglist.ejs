@@ -1,0 +1,372 @@
+<div
+  class="page-wrapper"
+  id="main-wrapper"
+  data-layout="vertical"
+  data-navbarbg="skin6"
+  data-sidebartype="full"
+  data-sidebar-position="fixed"
+  data-header-position="fixed"
+>
+  <!-- Sidebar Start -->
+  <%- include('sidenav.ejs') %>
+  <!--  Sidebar End -->
+  <!--  Main wrapper -->
+  <div class="body-wrapper">
+    <!--  Header Start -->
+    <header class="app-header"><%- include('nav.ejs') %></header>
+    <!--  Header End -->
+    <div class="container-fluid">
+      <button class="btn btn-primary" onclick="openNewBlogModal()">
+        Add New Blog
+      </button>
+
+      <br />
+      <br />
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Created by</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% blogs.forEach(blog => { %>
+          <tr>
+            <th scope="row"><%= blog.id %></th>
+            <td>
+              <img
+                src="/img/uploads/<%= blog.image %>"
+                alt="blog Image"
+                width="50"
+                height="50"
+              />
+            </td>
+            <td><%= blog.title %></td>
+            <td><%= blog.description %></td>
+            <td><%= blog.createdBy %></td>
+            <td><%= blog.createdAt %></td>
+            <td>
+              <button
+                class="btn btn-danger"
+                onclick="deleteblog('<%= blog.id %>')"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <%- include('footer.ejs') %>
+    </div>
+  </div>
+</div>
+<!-- modal-title -->
+<div class="modal" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit blog</h5>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="container">
+        <form id="editForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label" for="editName">Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="nameHelp"
+              id="catId"
+              name="catId"
+              hidden
+            />
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="nameHelp"
+              id="editName"
+              name="editName"
+            />
+            <div id="nameHelp" class="form-text">New blog name</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editDescription">Description</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="descHelp"
+              id="editDescription"
+              name="editDescription"
+            />
+            <div id="descHelp" class="form-text">blog Description</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editImage"
+              >Upload new picture:</label
+            >
+            <input
+              type="file"
+              class="form-control"
+              id="editImage"
+              name="image"
+              accept="image/*"
+            />
+            <div id="imageHelp" class="form-text">New blog name</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="saveblog()">
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- New blog modal -->
+<div class="modal" id="newblogModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Blog</h5>
+        <span class="close" onclick="closeNewblogModal()">&times;</span>
+      </div>
+      <div class="container">
+        <form id="newblogForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label" for="newName">Title:</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="newNameHelp"
+              id="blogtitle"
+              name="blogtitle"
+            />
+            <div id="newNameHelp" class="form-text">Blog Title</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newDescription">Description</label>
+            <input
+              type="text"
+              class="form-control"
+              aria-describedby="newDescHelp"
+              id="newDescription"
+              name="newDescription"
+            />
+            <div id="newDescHelp" class="form-text">Blog Description</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newImage">Upload Image:</label>
+            <input
+              type="file"
+              class="form-control"
+              id="newImage"
+              name="image"
+              accept="image/*"
+            />
+            <div id="newImageHelp" class="form-text">Upload a blog image</div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="addNewblog()"
+            >
+              Add blog
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript function to handle blog deletion
+  function deleteblog(blogId) {
+    // You can use JavaScript to make an AJAX request to the server to delete the blog.
+    // For example, using the Fetch API:
+    fetch(`/api/deleteblog/${blogId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        return response.json(); // Parse the JSON response from the server
+      })
+      .then((data) => {
+        if (data.message) {
+          // blog deleted successfully, you can update the UI as needed
+          // For example, remove the row from the table
+          alert(data.message);
+          const row = document.querySelector(`tr[data-blog-id="${blogId}"]`);
+          if (row) {
+            row.remove();
+          }
+          // Reload the page to update the table
+          window.location.reload();
+        } else {
+          // Handle error case
+          console.error("blog deletion failed");
+          alert("blog deletion failed"); // Display an error message
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while deleting the blog");
+      });
+  }
+
+  // Function to open the modal for editing
+  function openModal(blogId, blogName, blogDescription) {
+    const editNameInput = document.getElementById("editName");
+    const editDescription = document.getElementById("editDescription");
+    const catId = document.getElementById("catId");
+    // Populate the input fields with the current blog data
+    editNameInput.value = blogName;
+    editDescription.value = blogDescription;
+    catId.value = blogId;
+
+    // Show the modal
+    const modal = document.getElementById("editModal");
+    modal.style.display = "block";
+  }
+
+  // Function to close the modal
+  function closeModal() {
+    const modal = document.getElementById("editModal");
+    modal.style.display = "none";
+  }
+
+  // Function to save the edited blog
+  function saveblog() {
+    console.log("saveblog function is called");
+
+    const editNameInput = document.getElementById("editName");
+    const editDescriptionInput = document.getElementById("editDescription");
+    const editImageInput = document.getElementById("editImage");
+    const blogId = document.getElementById("catId").value;
+
+    const editedName = editNameInput.value;
+    const editedDescription = editDescriptionInput.value;
+
+    // Create a FormData object to handle file uploads
+    const formData = {
+      blogId: blogId,
+      name: editedName,
+      description: editedDescription,
+    };
+    // Add the selected image file to the FormData
+    const imageFile = editImageInput.files[0];
+    if (imageFile) {
+      // Convert the image file to a base64-encoded string
+      const reader = new FileReader();
+      reader.readAsDataURL(imageFile);
+      reader.onloadend = () => {
+        formData.image = reader.result;
+        // Now, you can send the newblogData as JSON
+        postEditData(formData);
+      };
+    } else {
+      // If no image was selected, send the data without the image
+      postEditData(formData);
+    }
+  }
+  function postEditData(requestData) {
+    // Convert the FormData to an object for JSON data
+
+    const apiUrl = "/api/updateblog";
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Specify that you're sending JSON data
+      },
+      body: JSON.stringify(requestData), // Convert the requestData object to JSON
+    })
+      .then((response) => {
+        if (response.ok) {
+          // blog updated successfully, you can update the UI as needed
+          closeModal();
+          alert("blog updated successfully");
+          window.location.reload();
+        } else {
+          // Handle error case
+          console.error("blog update failed");
+          alert("blog update failed"); // Display an error message
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while updating the blog");
+      });
+  }
+
+  function openNewBlogModal() {
+    const modal = document.getElementById("newblogModal");
+    modal.style.display = "block";
+  }
+
+  function closeNewblogModal() {
+    const modal = document.getElementById("newblogModal");
+    modal.style.display = "none";
+  }
+
+  function addNewblog() {
+    const newNameInput = document.getElementById("blogtitle");
+    const newDescriptionInput = document.getElementById("newDescription");
+    const newImageInput = document.getElementById("newImage");
+
+    const newName = newNameInput.value;
+    const newDescription = newDescriptionInput.value;
+    const newblogData = {
+      name: newName,
+      description: newDescription,
+    };
+
+    // Add the selected image file if available
+    const imageFile = newImageInput.files[0];
+    if (imageFile) {
+      // Convert the image file to a base64-encoded string
+      const reader = new FileReader();
+      reader.readAsDataURL(imageFile);
+      reader.onloadend = () => {
+        newblogData.image = reader.result;
+        // Now, you can send the newblogData as JSON
+        sendNewblogData(newblogData);
+      };
+    } else {
+      // If no image was selected, send the data without the image
+      sendNewblogData(newblogData);
+    }
+  }
+  function sendNewblogData(newblogData) {
+    const apiUrl = "/api/addblogs"; // Replace with the actual API endpoint for adding blogs
+
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Specify that you're sending JSON data
+      },
+      body: JSON.stringify(newblogData), // Convert the object to JSON
+    })
+      .then((response) => {
+        if (response.ok) {
+          // blog added successfully, you can update the UI as needed
+          closeNewblogModal();
+          alert("blog addition Successfully");
+          window.location.reload();
+        } else {
+          // Handle error case
+          console.error("blog addition failed");
+          alert("blog addition failed"); // Display an error message
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while adding the blog");
+      });
+  }
+</script>
